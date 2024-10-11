@@ -9,6 +9,9 @@ class RepresentEvent(BaseModel):
     price: int | None
     event_date: datetime
 
+    class Config:
+        from_attributes = True
+
 
 class RepresentEventDetails(BaseModel):
     id: int
@@ -17,6 +20,9 @@ class RepresentEventDetails(BaseModel):
     event_date: datetime
     description: str
     max_capacity: int | None
+
+    class Config:
+        from_attributes = True
 
 
 class CreateEventParams(BaseModel):

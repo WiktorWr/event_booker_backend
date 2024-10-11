@@ -9,7 +9,7 @@ from sqlalchemy import select
 def validate_user_create(fn):
     @wraps(fn)
     def wrapper(params: CreateUserParams, db: Session, *args, **kwargs):
-        if db.scalar(select(User).filter_by(username=params.username)):
+        if db.scalar(select(User).where(User.username == params.username)):
             raise AlreadyExistsException("username")
 
         return fn(params, db, *args, **kwargs)

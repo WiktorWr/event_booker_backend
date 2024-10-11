@@ -39,7 +39,7 @@ async def test_username_too_short(async_client: AsyncClient):
     response_data = response.json()
     errors = response_data["detail"]
 
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(errors) == 1
     assert errors[0]["loc"][-1] == "username"
     assert errors[0]["type"] == "string_too_short"
@@ -57,7 +57,7 @@ async def test_username_too_long(async_client: AsyncClient):
     response_data = response.json()
     errors = response_data["detail"]
 
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(errors) == 1
     assert errors[0]["loc"][-1] == "username"
     assert errors[0]["type"] == "string_too_long"
@@ -75,7 +75,7 @@ async def test_username_invalid_format(async_client: AsyncClient):
     response_data = response.json()
     errors = response_data["detail"]
 
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(errors) == 1
     assert errors[0]["loc"][-1] == "username"
     assert errors[0]["type"] == "value_error"
@@ -94,7 +94,7 @@ async def test_password_too_short(async_client: AsyncClient):
     response_data = response.json()
     errors = response_data["detail"]
 
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(errors) == 1
     assert errors[0]["loc"][-1] == "password"
     assert errors[0]["type"] == "string_too_short"
@@ -112,7 +112,7 @@ async def test_password_invalid_format(async_client: AsyncClient):
     response_data = response.json()
     errors = response_data["detail"]
 
-    assert response.status_code == 422
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(errors) == 1
     assert errors[0]["loc"][-1] == "password"
     assert errors[0]["type"] == "value_error"

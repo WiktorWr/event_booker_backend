@@ -25,6 +25,7 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.12"
 types-passlib = "^1.7.7.20240819"
+pytest-cov = "^5.0.0"
 
 
 [build-system]

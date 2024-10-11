@@ -1,0 +1,50 @@
+name: CI
+on:
+    push:
+      branches: [ main ]
+    pull_request:
+      branches: [ main ]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_HOST: localhost
+    services:
+      postgres:
+        image: postgres:17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: event_booker
+          POSTGRES_PASSWORD: event_booker
+          POSTGRES_DB: event_booker
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.12'
+        - name: Install dependencies
+          run: |
+            sudo apt-get update
+            python -m pip install --upgrade pip
+            pip install poetry
+            poetry install
+        - name: Run ruff check
+          run: |
+            poetry run ruff check .
+        - name: Run ruff format check
+          run: |
+            poetry run ruff format --check .
+        - name: Run mypy
+          run: |
+            poetry run mypy .
+        - name: pytest
+          run: |
+            poetry run pytest

@@ -1,21 +1,35 @@
-from sqlalchemy.orm import Session
-from .schemas import CreateEventParams
 from functools import wraps
 from app.users.models import User
 from app.users.enums import UserRole
 from app.exceptions import AccessForbiddenException
+from .models import Event
 
-USER_NOT_ORGANIZER_MSG = "User role is not organizer"
+USER_ROLE_NOT_ORGANIZER_MSG = "User role is not organizer"
+EVENT_NOT_BELONG_TO_USER_MSG = "The event does not belong to the current user"
 
 
-def authorize_event_create(fn):
+def current_user_role_is_organizer(fn):
     @wraps(fn)
-    def wrapper(
-        params: CreateEventParams, db: Session, current_user: User, *args, **kwargs
-    ):
-        if current_user.role != UserRole.ORGANIZER:
-            raise AccessForbiddenException(USER_NOT_ORGANIZER_MSG)
+    def wrapper(*args, **kwargs):
+        user: User = kwargs.get("current_user")
 
-        return fn(params, db=db, current_user=current_user, *args, **kwargs)
+        if user.role != UserRole.ORGANIZER:
+            raise AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
+
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+def current_user_is_event_organizer(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user: User = kwargs.get("current_user")
+        event: Event = kwargs.get("event")
+
+        if event.organizer_id != user.id:
+            raise AccessForbiddenException(EVENT_NOT_BELONG_TO_USER_MSG)
+
+        return fn(*args, **kwargs)
 
     return wrapper

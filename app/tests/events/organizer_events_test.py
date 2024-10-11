@@ -6,14 +6,14 @@ from app.tests.factories import UserFactory, EventFactory
 from fastapi import status
 
 
-ORGANIZER_EVENTS_URL = "/organizer/events"
+URL = "/organizer/events"
 
 
 @pytest.mark.asyncio
 async def test_user_unauthorized(async_client: AsyncClient):
     headers = utils.auth_header("invalid")
 
-    response = await async_client.get(ORGANIZER_EVENTS_URL, headers=headers)
+    response = await async_client.get(URL, headers=headers)
     response_data = response.json()
 
     expected_exception = InvalidTokenException()
@@ -27,7 +27,7 @@ async def test_everything_fine_no_events(async_client: AsyncClient):
     current_user = UserFactory()
     headers = utils.generate_user_auth_header(current_user.id)
 
-    response = await async_client.get(ORGANIZER_EVENTS_URL, headers=headers)
+    response = await async_client.get(URL, headers=headers)
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
@@ -44,7 +44,7 @@ async def test_everything_fine_with_events(async_client: AsyncClient):
 
     headers = utils.generate_user_auth_header(current_user.id)
 
-    response = await async_client.get(ORGANIZER_EVENTS_URL, headers=headers)
+    response = await async_client.get(URL, headers=headers)
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK

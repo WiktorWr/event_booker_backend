@@ -6,7 +6,7 @@ from app.tests import utils
 from app.auth.exceptions import InvalidTokenException
 from app.tests.factories import UserFactory
 from datetime import datetime
-from app.events.authorizers import USER_NOT_ORGANIZER_MSG
+from app.events.authorizers import USER_ROLE_NOT_ORGANIZER_MSG
 from app.exceptions import AccessForbiddenException
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
@@ -113,7 +113,7 @@ async def test_user_is_not_organizer(async_client: AsyncClient):
     )
     response_data = response.json()
 
-    expected_exception = AccessForbiddenException(USER_NOT_ORGANIZER_MSG)
+    expected_exception = AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

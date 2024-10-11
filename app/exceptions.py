@@ -14,3 +14,10 @@ class AccessForbiddenException(HTTPException):
         status_code = status.HTTP_403_FORBIDDEN
         detail = f"Access Forbidden: {reason}." if reason else "Access Forbidden."
         super().__init__(status_code=status_code, detail=detail)
+
+
+class NotFoundException(HTTPException):
+    def __init__(self, key: str):
+        status_code = status.HTTP_404_NOT_FOUND
+        detail = f"The {key} is not found"
+        super().__init__(status_code=status_code, detail=detail)

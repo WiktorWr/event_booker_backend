@@ -6,14 +6,15 @@ from app.database.dependencies import get_db
 from .models import Event
 from app.users.models import User
 from app.auth.dependencies import authenticate_user_from_token
-from .authorizers import authorize_event_create
+from .authorizers import current_user_role_is_organizer, current_user_is_event_organizer
 from app.pagination.schemas import PaginatedResponse, PaginationParams
 from app.pagination.dependencies import pagination_params
 from app.pagination.enums import SortEnum
 from sqlalchemy import desc, asc, select
+from .dependencies import get_event_by_id
 
 
-@authorize_event_create
+@current_user_role_is_organizer
 def create_event(
     params: CreateEventParams,
     *,
@@ -35,6 +36,7 @@ def create_event(
     return event
 
 
+@current_user_role_is_organizer
 def get_organizer_events(
     *,
     pagination: PaginationParams = Depends(pagination_params),
@@ -66,3 +68,13 @@ def get_organizer_events(
         page=pagination.page,
         items=events_json,
     )
+
+
+@current_user_role_is_organizer
+@current_user_is_event_organizer
+def get_organizer_event(
+    *,
+    current_user: User = Depends(authenticate_user_from_token),
+    event=Depends(get_event_by_id),
+) -> Event:
+    return event

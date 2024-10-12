@@ -11,7 +11,8 @@ from .services import (
     get_events,
     get_event,
     enroll_for_event,
-    get_participant_events
+    get_participant_events,
+    remove_enrollment,
 )
 
 router = APIRouter(tags=["Event"])
@@ -108,6 +109,17 @@ async def participant_events(
     events: PaginatedResponse[RepresentEvent] = Depends(get_participant_events),
 ):
     return events
+
+
+@router.delete(
+    "/participant/events/{event_id}/cancel",
+    status_code=status.HTTP_200_OK,
+    summary="Cancel participant's enrollment",
+)
+async def cancel_enrollment(
+    _: None = Depends(remove_enrollment),
+):
+    return Response(status_code=status.HTTP_200_OK)
 
 
 @router.get(

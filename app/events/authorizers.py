@@ -1,5 +1,5 @@
 from functools import wraps
-from .exceptions import AlreadyEnrolledException
+from .exceptions import AlreadyEnrolledException, NotEnrolledException
 from app.users.models import User
 from app.users.enums import UserRole
 from app.exceptions import AccessForbiddenException
@@ -67,6 +67,27 @@ def participant_is_not_enrolled(fn):
 
         if enrollemnt is not None:
             raise AlreadyEnrolledException()
+
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+def participant_is_enrolled(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user: User = kwargs.get("current_user")
+        event: Event = kwargs.get("event")
+        db: Session = kwargs.get("db")
+
+        enrollemnt = db.scalar(
+            select(Enrollment).where(
+                Enrollment.participant_id == user.id, Enrollment.event_id == event.id
+            )
+        )
+
+        if enrollemnt is None:
+            raise NotEnrolledException()
 
         return fn(*args, **kwargs)
 

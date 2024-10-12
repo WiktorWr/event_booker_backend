@@ -13,6 +13,7 @@ from .authorizers import (
     event_belongs_to_organizer,
     current_user_role_is_participant,
     participant_is_not_enrolled,
+    participant_is_enrolled,
 )
 from app.pagination.schemas import PaginatedResponse, PaginationParams
 from app.pagination.dependencies import pagination_params
@@ -234,3 +235,21 @@ def delete_event(
     event: Event = Depends(get_event_by_id),
 ) -> None:
     return db.delete(event)
+
+
+@current_user_role_is_participant
+@participant_is_enrolled
+def remove_enrollment(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user_from_token),
+    event: Event = Depends(get_event_by_id),
+):
+    enrollment = db.execute(
+        select(Enrollment).where(
+            Enrollment.event_id == event.id,
+            Enrollment.participant_id == current_user.id,
+        )
+    ).scalar_one()
+
+    return db.delete(enrollment)

@@ -5,6 +5,7 @@ from app.exceptions import AccessForbiddenException
 from .models import Event
 
 USER_ROLE_NOT_ORGANIZER_MSG = "User role is not organizer"
+USER_ROLE_NOT_PARTICIPANT_MSG = "User role is not participant"
 EVENT_NOT_BELONG_TO_USER_MSG = "The event does not belong to the current user"
 
 
@@ -15,6 +16,19 @@ def current_user_role_is_organizer(fn):
 
         if user.role != UserRole.ORGANIZER:
             raise AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
+
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+def current_user_role_is_participant(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user: User = kwargs.get("current_user")
+
+        if user.role != UserRole.PARTICIPANT:
+            raise AccessForbiddenException(USER_ROLE_NOT_PARTICIPANT_MSG)
 
         return fn(*args, **kwargs)
 

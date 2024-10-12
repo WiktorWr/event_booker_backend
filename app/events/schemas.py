@@ -39,3 +39,8 @@ class UpdateEventParams(BaseModel):
     event_date: Optional[datetime] = Field(default=None)
     description: Optional[str] = Field(default=None)
     max_capacity: Optional[int | None] = Field(default=None, gt=0)
+
+
+class EventFilters(BaseModel):
+    min_price: Optional[int] = Field(default=None)
+    max_price: Optional[int] = Field(default=None)

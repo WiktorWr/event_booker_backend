@@ -3,7 +3,7 @@ from app.users.models import User
 from app.auth.models import RevokedToken
 from sqlalchemy.orm import Session
 from app.users.enums import UserRole
-from app.events.models import Event
+from app.events.models import Enrollment, Event
 from datetime import datetime
 
 
@@ -39,7 +39,16 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     organizer: User = factory.SubFactory(UserFactory)
 
 
+class EnrollmentFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Enrollment
+
+    participant: User = factory.SubFactory(UserFactory)
+    event: Event = factory.SubFactory(EventFactory)
+
+
 def setup_factories(db: Session) -> None:
     UserFactory._meta.sqlalchemy_session = db
     RevokedTokenFactory._meta.sqlalchemy_session = db
     EventFactory._meta.sqlalchemy_session = db
+    EnrollmentFactory._meta.sqlalchemy_session = db

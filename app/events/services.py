@@ -5,13 +5,14 @@ from .schemas import CreateEventParams, EventFilters, UpdateEventParams, Represe
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from app.database.dependencies import get_db
-from .models import Event
+from .models import Event, Enrollment
 from app.users.models import User
 from app.auth.dependencies import authenticate_user_from_token
 from .authorizers import (
     current_user_role_is_organizer,
     event_belongs_to_organizer,
     current_user_role_is_participant,
+    participant_is_not_enrolled,
 )
 from app.pagination.schemas import PaginatedResponse, PaginationParams
 from app.pagination.dependencies import pagination_params
@@ -40,6 +41,25 @@ def create_event(
     db.commit()
 
     return event
+
+
+@current_user_role_is_participant
+@participant_is_not_enrolled
+def enroll_for_event(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user_from_token),
+    event: Event = Depends(get_event_by_id),
+) -> None:
+    enrollment = Enrollment(
+        participant=current_user,
+        event=event,
+    )
+
+    db.add(enrollment)
+    db.commit()
+
+    return None
 
 
 @current_user_role_is_organizer

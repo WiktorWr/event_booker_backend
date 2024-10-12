@@ -10,6 +10,7 @@ from .services import (
     delete_event,
     get_events,
     get_event,
+    enroll_for_event,
 )
 
 router = APIRouter(tags=["Event"])
@@ -23,6 +24,17 @@ router = APIRouter(tags=["Event"])
 )
 async def create(event: Event = Depends(create_event)):
     return event
+
+
+@router.post(
+    "/events/{event_id}/enroll",
+    status_code=status.HTTP_201_CREATED,
+    summary="Enroll for the event",
+)
+async def enroll(
+    _: None = Depends(enroll_for_event),
+):
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.get(

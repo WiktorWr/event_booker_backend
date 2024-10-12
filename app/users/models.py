@@ -7,8 +7,8 @@ from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from app.events.models import Event
+if TYPE_CHECKING:  # pragma: no cover
+    from app.events.models import Event, Enrollment
 
 
 class User(Base):
@@ -20,4 +20,10 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(PgEnum(UserRole, name="user_role"))
     events_as_organizer: Mapped[list["Event"]] = relationship(
         back_populates="organizer"
+    )
+    participant_enrollments: Mapped["Enrollment"] = relationship(
+        back_populates="participant"
+    )
+    events_as_participant: Mapped[list["Event"]] = relationship(
+        secondary="enrollments", back_populates="participants"
     )

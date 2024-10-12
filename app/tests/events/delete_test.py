@@ -1,18 +1,18 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import func, select
-from app.events.authorizers import (
-    EVENT_NOT_BELONG_TO_USER_MSG,
-    USER_ROLE_NOT_ORGANIZER_MSG,
-)
 from app.events.models import Event
-from app.exceptions import AccessForbiddenException, NotFoundException
+from app.exceptions import NotFoundException
 from app.tests import utils
 from app.auth.exceptions import InvalidTokenException
 from app.tests.factories import EventFactory, UserFactory
 from app.users.enums import UserRole
 from sqlalchemy.orm import Session
 from fastapi import status
+from app.events.exceptions import (
+    EventNotBelongToUserException,
+    UserNotOrganizerException,
+)
 
 
 BASE_URL = "/organizer/events"
@@ -61,7 +61,7 @@ async def test_user_is_not_organizer(async_client: AsyncClient):
     response = await async_client.delete(url(event.id), headers=headers)
 
     response_data = response.json()
-    expected_exception = AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
+    expected_exception = UserNotOrganizerException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail
@@ -78,7 +78,7 @@ async def test_current_user_not_event_owner(async_client: AsyncClient):
     response = await async_client.delete(url(event.id), headers=headers)
     response_data = response.json()
 
-    expected_exception = AccessForbiddenException(EVENT_NOT_BELONG_TO_USER_MSG)
+    expected_exception = EventNotBelongToUserException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

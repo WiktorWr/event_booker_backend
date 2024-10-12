@@ -2,10 +2,9 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from app.auth.exceptions import InvalidTokenException
-from app.events.authorizers import USER_ROLE_NOT_PARTICIPANT_MSG
-from app.events.exceptions import AlreadyEnrolledException
+from app.events.exceptions import AlreadyEnrolledException, UserNotParticipantException
 from app.events.models import Event, Enrollment
-from app.exceptions import AccessForbiddenException, NotFoundException
+from app.exceptions import NotFoundException
 from app.tests import utils
 from app.tests.factories import EventFactory, UserFactory, EnrollmentFactory
 from app.users.enums import UserRole
@@ -56,7 +55,7 @@ async def test_user_not_participant(async_client: AsyncClient):
     response = await async_client.post(url(event.id), headers=headers)
     response_data = response.json()
 
-    expected_exception = AccessForbiddenException(USER_ROLE_NOT_PARTICIPANT_MSG)
+    expected_exception = UserNotParticipantException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

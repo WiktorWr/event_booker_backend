@@ -2,12 +2,11 @@ from pydantic import ValidationError
 import pytest
 from httpx import AsyncClient
 from fastapi import status
+from app.events.exceptions import UserNotOrganizerException
 from app.tests import utils
 from app.auth.exceptions import InvalidTokenException
 from app.tests.factories import UserFactory
 from datetime import datetime
-from app.events.authorizers import USER_ROLE_NOT_ORGANIZER_MSG
-from app.exceptions import AccessForbiddenException
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from app.events.models import Event
@@ -107,7 +106,7 @@ async def test_user_is_not_organizer(async_client: AsyncClient):
     response = await async_client.post(URL, headers=headers, json=json_data)
     response_data = response.json()
 
-    expected_exception = AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
+    expected_exception = UserNotOrganizerException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

@@ -1,15 +1,16 @@
 from functools import wraps
-from .exceptions import AlreadyEnrolledException, NotEnrolledException
+from .exceptions import (
+    AlreadyEnrolledException,
+    EventNotBelongToUserException,
+    NotEnrolledException,
+    UserNotOrganizerException,
+    UserNotParticipantException,
+)
 from app.users.models import User
 from app.users.enums import UserRole
-from app.exceptions import AccessForbiddenException
 from .models import Event, Enrollment
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-
-USER_ROLE_NOT_ORGANIZER_MSG = "User role is not organizer"
-USER_ROLE_NOT_PARTICIPANT_MSG = "User role is not participant"
-EVENT_NOT_BELONG_TO_USER_MSG = "The event does not belong to the current user"
 
 
 def current_user_role_is_organizer(fn):
@@ -18,7 +19,7 @@ def current_user_role_is_organizer(fn):
         user: User = kwargs.get("current_user")
 
         if user.role != UserRole.ORGANIZER:
-            raise AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
+            raise UserNotOrganizerException()
 
         return fn(*args, **kwargs)
 
@@ -31,7 +32,7 @@ def current_user_role_is_participant(fn):
         user: User = kwargs.get("current_user")
 
         if user.role != UserRole.PARTICIPANT:
-            raise AccessForbiddenException(USER_ROLE_NOT_PARTICIPANT_MSG)
+            raise UserNotParticipantException()
 
         return fn(*args, **kwargs)
 
@@ -45,7 +46,7 @@ def event_belongs_to_organizer(fn):
         event: Event = kwargs.get("event")
 
         if event.organizer_id != user.id:
-            raise AccessForbiddenException(EVENT_NOT_BELONG_TO_USER_MSG)
+            raise EventNotBelongToUserException()
 
         return fn(*args, **kwargs)
 

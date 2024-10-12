@@ -2,6 +2,7 @@ from pydantic import ValidationError
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.orm import Session
+from app.users.exceptions import UsernameAlreadyExistsException
 from app.users.models import User
 from app.tests.factories import UserFactory
 from app.users.router import router as users_router
@@ -9,7 +10,6 @@ from fastapi import status
 from sqlalchemy import select, func
 from app.users.enums import UserRole
 from app.users.schemas import INVALID_USERNAME_ERROR, RepresentUser
-from app.exceptions import AlreadyExistsException
 
 
 @pytest.mark.asyncio
@@ -131,7 +131,7 @@ async def test_username_already_exists(async_client: AsyncClient):
     response = await async_client.post(users_router.prefix, json=json_data)
     response_data = response.json()
 
-    expected_exception = AlreadyExistsException("username")
+    expected_exception = UsernameAlreadyExistsException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

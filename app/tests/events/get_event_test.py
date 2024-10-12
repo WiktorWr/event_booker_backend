@@ -1,14 +1,12 @@
 from pydantic import ValidationError
 import pytest
 from httpx import AsyncClient
+from app.events.exceptions import UserNotParticipantException
 from app.tests import utils
 from app.auth.exceptions import InvalidTokenException
 from app.tests.factories import UserFactory, EventFactory
 from app.users.enums import UserRole
-from app.exceptions import AccessForbiddenException, NotFoundException
-from app.events.authorizers import (
-    USER_ROLE_NOT_PARTICIPANT_MSG,
-)
+from app.exceptions import NotFoundException
 from app.events.models import Event
 from fastapi import status
 from app.events.schemas import RepresentEventDetails
@@ -44,7 +42,7 @@ async def test_user_not_participant(async_client: AsyncClient):
     response = await async_client.get(url(event.id), headers=headers)
     response_data = response.json()
 
-    expected_exception = AccessForbiddenException(USER_ROLE_NOT_PARTICIPANT_MSG)
+    expected_exception = UserNotParticipantException()
 
     assert response.status_code == expected_exception.status_code
     assert response_data["detail"] == expected_exception.detail

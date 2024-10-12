@@ -11,6 +11,7 @@ from .services import (
     get_events,
     get_event,
     enroll_for_event,
+    get_participant_events
 )
 
 router = APIRouter(tags=["Event"])
@@ -93,6 +94,18 @@ async def delete(
 )
 async def organizer_events(
     events: PaginatedResponse[RepresentEvent] = Depends(get_organizer_events),
+):
+    return events
+
+
+@router.get(
+    "/participant/events",
+    response_model=PaginatedResponse[RepresentEvent],
+    status_code=status.HTTP_200_OK,
+    summary="Get participant's events",
+)
+async def participant_events(
+    events: PaginatedResponse[RepresentEvent] = Depends(get_participant_events),
 ):
     return events
 

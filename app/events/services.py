@@ -99,6 +99,48 @@ def get_organizer_events(
 
 
 @current_user_role_is_participant
+def get_participant_events(
+    *,
+    pagination: PaginationParams = Depends(pagination_params),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user_from_token),
+) -> PaginatedResponse[RepresentEvent]:
+    order = desc if pagination.order == SortEnum.DESC else asc
+
+    query = (
+        select(Event)
+        .join(Enrollment, Enrollment.event_id == Event.id)
+        .where(Enrollment.participant_id == current_user.id)
+        .limit(pagination.per_page)
+        .offset(
+            pagination.page - 1
+            if pagination.page == 1
+            else (pagination.page - 1) * pagination.per_page
+        )
+        .order_by(order(Event.id))
+    )
+
+    events = db.scalars(query)
+    events_json = [RepresentEvent.model_validate(event) for event in events]
+    count = db.execute(
+        select(func.count()).select_from(
+            select(Event.id)
+            .join(Enrollment, Enrollment.event_id == Event.id)
+            .where(Enrollment.participant_id == current_user.id)
+            .subquery()
+        )
+    ).scalar_one()
+    pages = ceil(count / pagination.per_page)
+
+    return PaginatedResponse[RepresentEvent](
+        pages=pages,
+        per_page=pagination.per_page,
+        page=pagination.page,
+        items=events_json,
+    )
+
+
+@current_user_role_is_participant
 def get_events(
     *,
     filters: EventFilters = Depends(get_events_filters),

@@ -1,10 +1,10 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Response, status, Depends
 from .schemas import RepresentEventDetails
 from .services import create_event, get_organizer_events
 from .models import Event
 from app.pagination.schemas import PaginatedResponse
 from .schemas import RepresentEvent
-from .services import get_organizer_event, update_event
+from .services import get_organizer_event, update_event, delete_event
 
 router = APIRouter(tags=["Event"])
 
@@ -23,12 +23,24 @@ async def create(event: Event = Depends(create_event)):
     "/organizer/events/{event_id}",
     response_model=RepresentEventDetails,
     status_code=status.HTTP_200_OK,
-    summary="Update evet's data",
+    summary="Update event's data",
 )
 async def update(
     updated_event: Event = Depends(update_event),
 ):
     return updated_event
+
+
+@router.delete(
+    "/organizer/events/{event_id}",
+    response_model=RepresentEventDetails,
+    status_code=status.HTTP_200_OK,
+    summary="Delete event",
+)
+async def delete(
+    _: None = Depends(delete_event),
+):
+    return Response(status_code=status.HTTP_200_OK)
 
 
 @router.get(

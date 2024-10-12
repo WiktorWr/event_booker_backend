@@ -98,3 +98,14 @@ def update_event(
     db.refresh(event)
 
     return event
+
+
+@current_user_role_is_organizer
+@event_belongs_to_organizer
+def delete_event(
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user_from_token),
+    event: Event = Depends(get_event_by_id),
+) -> None:
+    return db.delete(event)

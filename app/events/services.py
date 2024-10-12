@@ -154,6 +154,15 @@ def update_event(
     return event
 
 
+@current_user_role_is_participant
+def get_event(
+    *,
+    current_user: User = Depends(authenticate_user_from_token),
+    event: Event = Depends(get_event_by_id),
+) -> Event:
+    return event
+
+
 @current_user_role_is_organizer
 @event_belongs_to_organizer
 def delete_event(

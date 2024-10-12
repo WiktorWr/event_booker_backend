@@ -4,7 +4,7 @@ from .services import create_event, get_organizer_events
 from .models import Event
 from app.pagination.schemas import PaginatedResponse
 from .schemas import RepresentEvent
-from .services import get_organizer_event
+from .services import get_organizer_event, update_event
 
 router = APIRouter(tags=["Event"])
 
@@ -17,6 +17,18 @@ router = APIRouter(tags=["Event"])
 )
 async def create(event: Event = Depends(create_event)):
     return event
+
+
+@router.patch(
+    "/organizer/events/{event_id}",
+    response_model=RepresentEventDetails,
+    status_code=status.HTTP_200_OK,
+    summary="Update evet's data",
+)
+async def update(
+    updated_event: Event = Depends(update_event),
+):
+    return updated_event
 
 
 @router.get(

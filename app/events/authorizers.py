@@ -21,7 +21,7 @@ def current_user_role_is_organizer(fn):
     return wrapper
 
 
-def current_user_is_event_organizer(fn):
+def event_belongs_to_organizer(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         user: User = kwargs.get("current_user")

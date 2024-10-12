@@ -15,14 +15,14 @@ from app.events.schemas import RepresentEventDetails
 
 from app.users.enums import UserRole
 
-EVENT_CREATE_URL = "/events"
+URL = "/events"
 
 
 @pytest.mark.asyncio
 async def test_user_unauthorized(async_client: AsyncClient):
     headers = utils.auth_header("invalid")
 
-    response = await async_client.post(EVENT_CREATE_URL, headers=headers, json={})
+    response = await async_client.post(URL, headers=headers, json={})
     response_data = response.json()
 
     expected_exception = InvalidTokenException()
@@ -36,7 +36,7 @@ async def test_missing_params(async_client: AsyncClient):
     current_user = UserFactory()
     headers = utils.generate_user_auth_header(current_user.id)
 
-    response = await async_client.post(EVENT_CREATE_URL, headers=headers, json={})
+    response = await async_client.post(URL, headers=headers, json={})
     response_data = response.json()
     errors = response_data["detail"]
 
@@ -61,9 +61,7 @@ async def test_negative_price(async_client: AsyncClient):
         "price": -1,
     }
 
-    response = await async_client.post(
-        EVENT_CREATE_URL, headers=headers, json=json_data
-    )
+    response = await async_client.post(URL, headers=headers, json=json_data)
     response_data = response.json()
     errors = response_data["detail"]
 
@@ -85,9 +83,7 @@ async def test_negative_capacity(async_client: AsyncClient):
         "max_capacity": -1,
     }
 
-    response = await async_client.post(
-        EVENT_CREATE_URL, headers=headers, json=json_data
-    )
+    response = await async_client.post(URL, headers=headers, json=json_data)
     response_data = response.json()
     errors = response_data["detail"]
 
@@ -108,9 +104,7 @@ async def test_user_is_not_organizer(async_client: AsyncClient):
         "description": "Description",
     }
 
-    response = await async_client.post(
-        EVENT_CREATE_URL, headers=headers, json=json_data
-    )
+    response = await async_client.post(URL, headers=headers, json=json_data)
     response_data = response.json()
 
     expected_exception = AccessForbiddenException(USER_ROLE_NOT_ORGANIZER_MSG)
@@ -134,9 +128,7 @@ async def test_everything_is_fine(db_session: Session, async_client: AsyncClient
 
     assert db_session.scalar(select(func.count()).select_from(Event)) == 0
 
-    response = await async_client.post(
-        EVENT_CREATE_URL, headers=headers, json=json_data
-    )
+    response = await async_client.post(URL, headers=headers, json=json_data)
     response_data = response.json()
 
     assert response.status_code == 201

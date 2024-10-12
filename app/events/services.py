@@ -1,12 +1,12 @@
 from math import ceil
-from .schemas import CreateEventParams, RepresentEvent
+from .schemas import CreateEventParams, UpdateEventParams, RepresentEvent
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from app.database.dependencies import get_db
 from .models import Event
 from app.users.models import User
 from app.auth.dependencies import authenticate_user_from_token
-from .authorizers import current_user_role_is_organizer, current_user_is_event_organizer
+from .authorizers import current_user_role_is_organizer, event_belongs_to_organizer
 from app.pagination.schemas import PaginatedResponse, PaginationParams
 from app.pagination.dependencies import pagination_params
 from app.pagination.enums import SortEnum
@@ -71,10 +71,30 @@ def get_organizer_events(
 
 
 @current_user_role_is_organizer
-@current_user_is_event_organizer
+@event_belongs_to_organizer
 def get_organizer_event(
     *,
     current_user: User = Depends(authenticate_user_from_token),
-    event=Depends(get_event_by_id),
+    event: Event = Depends(get_event_by_id),
 ) -> Event:
+    return event
+
+
+@current_user_role_is_organizer
+@event_belongs_to_organizer
+def update_event(
+    params: UpdateEventParams,
+    *,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user_from_token),
+    event: Event = Depends(get_event_by_id),
+) -> Event:
+    update_data = params.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(event, field, value)
+
+    db.commit()
+    db.refresh(event)
+
     return event

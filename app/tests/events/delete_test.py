@@ -1,11 +1,11 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import func, select
-from app.events.models import Event
+from app.events.models import Enrollment, Event
 from app.exceptions import NotFoundException
 from app.tests import utils
 from app.auth.exceptions import InvalidTokenException
-from app.tests.factories import EventFactory, UserFactory
+from app.tests.factories import EnrollmentFactory, EventFactory, UserFactory
 from app.users.enums import UserRole
 from sqlalchemy.orm import Session
 from fastapi import status
@@ -87,13 +87,21 @@ async def test_current_user_not_event_owner(async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_everything_fine(db_session: Session, async_client: AsyncClient):
     current_user = UserFactory()
-    event = EventFactory(organizer=current_user)
+    event_one = EventFactory(organizer=current_user)
+    event_two = EventFactory()
+    participant_one = UserFactory(role=UserRole.PARTICIPANT)
+    participant_two = UserFactory(role=UserRole.PARTICIPANT)
+    EnrollmentFactory(event=event_one, participant=participant_one)
+    EnrollmentFactory(event=event_two, participant=participant_one)
+    EnrollmentFactory(event=event_one, participant=participant_two)
 
     headers = utils.generate_user_auth_header(current_user.id)
 
-    assert db_session.scalar(select(func.count()).select_from(Event)) == 1
+    assert db_session.scalar(select(func.count()).select_from(Event)) == 2
+    assert db_session.scalar(select(func.count()).select_from(Enrollment)) == 3
 
-    response = await async_client.delete(url(event.id), headers=headers)
+    response = await async_client.delete(url(event_one.id), headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
-    assert db_session.scalar(select(func.count()).select_from(Event)) == 0
+    assert db_session.scalar(select(func.count()).select_from(Event)) == 1
+    assert db_session.scalar(select(func.count()).select_from(Enrollment)) == 1

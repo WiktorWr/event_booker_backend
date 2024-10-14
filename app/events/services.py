@@ -53,8 +53,8 @@ def enroll_for_event(
     event: Event = Depends(get_event_by_id),
 ) -> None:
     enrollment = Enrollment(
-        participant=current_user,
-        event=event,
+        participant_id=current_user.id,
+        event_id=event.id,
     )
 
     db.add(enrollment)

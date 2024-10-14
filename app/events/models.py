@@ -21,23 +21,21 @@ class Event(Base):
     event_date: Mapped[datetime] = mapped_column(DateTime)
     organizer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     organizer: Mapped["User"] = relationship(back_populates="events_as_organizer")
-    event_enrollments: Mapped["Enrollment"] = relationship(back_populates="event")
-    participants: Mapped[list["User"]] = relationship(
-        secondary="enrollments", back_populates="events_as_participant"
+    enrollments: Mapped[list["Enrollment"]] = relationship(
+        "Enrollment", back_populates="event", cascade="all, delete-orphan"
     )
 
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
 
-    participant_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", primary_key=True)
-    )
-    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    participant_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    event_id: Mapped[int] = mapped_column(ForeignKey("events.id"))
 
-    event: Mapped["Event"] = relationship(back_populates="event_enrollments")
-    participant: Mapped["User"] = relationship(back_populates="participant_enrollments")
+    participant: Mapped["User"] = relationship("User", back_populates="enrollments")
+    event: Mapped["Event"] = relationship("Event", back_populates="enrollments")
 
     __table_args__ = (
-        UniqueConstraint("participant_id", "event_id", name="unique_participant_event"),
+        UniqueConstraint("participant_id", "event_id", name="unique_enrollment"),
     )

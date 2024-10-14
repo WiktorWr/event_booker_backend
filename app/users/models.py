@@ -21,9 +21,6 @@ class User(Base):
     events_as_organizer: Mapped[list["Event"]] = relationship(
         back_populates="organizer"
     )
-    participant_enrollments: Mapped["Enrollment"] = relationship(
-        back_populates="participant"
-    )
-    events_as_participant: Mapped[list["Event"]] = relationship(
-        secondary="enrollments", back_populates="participants"
+    enrollments: Mapped[list["Enrollment"]] = relationship(
+        "Enrollment", back_populates="participant", cascade="all, delete-orphan"
     )

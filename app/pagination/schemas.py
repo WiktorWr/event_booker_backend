@@ -13,7 +13,6 @@ class PaginationParams(BaseModel):
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    pages: int
     page: int
     per_page: int
     items: list[T]

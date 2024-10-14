@@ -52,7 +52,6 @@ async def test_everything_fine_not_filters(async_client: AsyncClient):
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["pages"] == 1
     {item["id"] for item in response_data["items"]} == {
         event_one.id,
         event_two.id,
@@ -77,7 +76,6 @@ async def test_everything_fine_with_min_price_filter(async_client: AsyncClient):
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["pages"] == 1
     {item["id"] for item in response_data["items"]} == {
         event_two.id,
         event_three.id,
@@ -102,7 +100,6 @@ async def test_everything_fine_with_max_price_filter(async_client: AsyncClient):
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["pages"] == 1
     {item["id"] for item in response_data["items"]} == {
         event_one.id,
         event_two.id,
@@ -127,5 +124,4 @@ async def test_everything_fine_with_all_filters(async_client: AsyncClient):
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["pages"] == 1
     {item["id"] for item in response_data["items"]} == {event_two.id, event_four.id}

@@ -44,7 +44,7 @@ jobs:
             poetry run ruff format --check .
         - name: Run mypy
           run: |
-            poetry run mypy .
+            poetry run mypy --enable-incomplete-feature=NewGenericSyntax .
         - name: pytest
           run: |
             poetry run pytest

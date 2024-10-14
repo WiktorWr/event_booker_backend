@@ -65,5 +65,4 @@ async def test_everything_fine_with_events(async_client: AsyncClient):
     response_data = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert response_data["pages"] == 1
     {item["id"] for item in response_data["items"]} == {event_one.id, event_two.id}

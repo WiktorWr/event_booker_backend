@@ -70,7 +70,7 @@ def get_organizer_events(
 ) -> PaginatedResponse[RepresentEvent]:
     query = select(Event).where(Event.organizer_id == current_user.id)
 
-    return paginate_query(db, query, pagination, RepresentEvent)
+    return paginate_query(db, query, pagination, RepresentEvent, Event.id)
 
 
 @current_user_role_is_participant
@@ -86,7 +86,7 @@ def get_participant_events(
         .where(Enrollment.participant_id == current_user.id)
     )
 
-    return paginate_query(db, query, pagination, RepresentEvent)
+    return paginate_query(db, query, pagination, RepresentEvent, Event.id)
 
 
 @current_user_role_is_participant
@@ -109,7 +109,7 @@ def get_events(
             or_(Event.price <= filters.max_price, Event.price.is_(None))
         )
 
-    return paginate_query(db, query, pagination, RepresentEvent)
+    return paginate_query(db, query, pagination, RepresentEvent, Event.id)
 
 
 @current_user_role_is_organizer
